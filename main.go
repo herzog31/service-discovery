@@ -6,14 +6,15 @@ import (
 
 func main() {
 
-	d, err := NewDiscovery("tcp://192.168.178.27:4243")
+	d, err := NewDiscovery("tcp://192.168.178.27:4243", 8080)
 	if err != nil {
 		os.Exit(1)
 	}
-	d.listen()
+	d.refreshList()
+	go d.listen()
+	d.serveWeb()
 
 	// TODO(mjb): Settings
-	// TODO(mjb): Webserver + API
 	// TODO(mjb): Save logs
 	// TODO(mjb): Persistence
 }

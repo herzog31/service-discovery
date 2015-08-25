@@ -4,22 +4,31 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fsouza/go-dockerclient"
+	"github.com/julienschmidt/httprouter"
+	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type Discovery struct {
+	sync.Mutex
 	dockerAPI      string
 	listener       chan *docker.APIEvents
 	containers     []docker.APIContainers
 	containersFull map[string]*docker.Container
 	client         *docker.Client
+	apiPort        int64
+	hostname       string
 }
 
-func NewDiscovery(dockerAPI string) (*Discovery, error) {
+func NewDiscovery(dockerAPI string, apiPort int64) (*Discovery, error) {
 	d := new(Discovery)
 	d.dockerAPI = dockerAPI
+	d.apiPort = apiPort
+	d.hostname = "marb.ec"
 	d.listener = make(chan *docker.APIEvents)
+	d.containers = make([]docker.APIContainers, 0)
 	d.containersFull = make(map[string]*docker.Container)
 	client, err := docker.NewClient(d.dockerAPI)
 	if err != nil {
@@ -46,6 +55,8 @@ func (d *Discovery) refreshList() error {
 	if err != nil {
 		return err
 	}
+	d.Lock()
+	defer d.Unlock()
 	d.containers = containers
 	for _, container := range containers {
 		id := container.ID
@@ -68,12 +79,30 @@ func (d *Discovery) handleEvent(event *docker.APIEvents) error {
 	return nil
 }
 
-func (d *Discovery) GetPortMappings(name string) (map[docker.Port][]docker.PortBinding, error) {
+func (d *Discovery) GetPortMappings(name string) ([]Mapping, error) {
 	container, ok := d.containersFull[name]
 	if !ok {
 		return nil, errors.New("Container not found!")
 	}
-	return container.NetworkSettings.Ports, nil
+
+	mappings := make([]Mapping, 0, len(container.NetworkSettings.Ports))
+	for k, v := range container.NetworkSettings.Ports {
+		iPort, _ := strconv.ParseInt(k.Port(), 10, 64)
+		host := v[0]
+		hPort, _ := strconv.ParseInt(host.HostPort, 10, 64)
+		mappings = append(mappings, Mapping{
+			Container: Port{
+				Port:     iPort,
+				Protocol: k.Proto(),
+			},
+			Host: Port{
+				Port:     hPort,
+				Protocol: k.Proto(),
+			},
+			Hostname: d.hostname,
+		})
+	}
+	return mappings, nil
 }
 
 func (d *Discovery) GetPortMapping(name string, port Port) (Port, error) {
@@ -82,16 +111,27 @@ func (d *Discovery) GetPortMapping(name string, port Port) (Port, error) {
 		return Port{}, err
 	}
 
-	internal := port.ToDockerPort()
-	mapping, ok := mappings[internal]
-	if !ok {
-		return Port{}, errors.New(fmt.Sprintf("No port mapping available for internal port %s", port))
+	for _, mapping := range mappings {
+		if mapping.Container.String() == port.String() {
+			return mapping.Host, nil
+		}
 	}
 
-	firstMapping := mapping[0]
-	parsed, _ := strconv.ParseInt(firstMapping.HostPort, 10, 64)
-	return Port{
-		port:     parsed,
-		protocol: port.protocol,
-	}, nil
+	return Port{}, errors.New(fmt.Sprintf("No port mapping available for internal port %s", port))
+
+}
+
+func (d *Discovery) serveWeb() {
+	r := httprouter.New()
+	r.GET("/api/containers", d.ViewAPIContainers)
+	r.GET("/api/containersFull", d.ViewAPIContainersFull)
+	r.GET("/api/container/:name", d.ViewAPIContainerName)
+	r.GET("/api/container/:name/mappings", d.ViewAPIContainerMappings)
+	r.GET("/api/container/:name/mapping/:port", d.ViewAPIContainerMapping)
+	r.GET("/api/container/:name/mapping/:port/:protocol", d.ViewAPIContainerMapping)
+	r.GET("/web/settings", d.ViewWebSettings)
+	r.POST("/web/settings", d.ViewWebSettingsPost)
+	r.GET("/web/containers", d.ViewWebContainers)
+
+	http.ListenAndServe(fmt.Sprintf(":%d", d.apiPort), r)
 }
