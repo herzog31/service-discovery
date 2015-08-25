@@ -4,19 +4,23 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fsouza/go-dockerclient"
+	"strconv"
+	"strings"
 )
 
 type Discovery struct {
-	dockerAPI  string
-	listener   chan *docker.APIEvents
-	containers []docker.APIContainers
-	client     *docker.Client
+	dockerAPI      string
+	listener       chan *docker.APIEvents
+	containers     []docker.APIContainers
+	containersFull map[string]*docker.Container
+	client         *docker.Client
 }
 
 func NewDiscovery(dockerAPI string) (*Discovery, error) {
 	d := new(Discovery)
 	d.dockerAPI = dockerAPI
 	d.listener = make(chan *docker.APIEvents)
+	d.containersFull = make(map[string]*docker.Container)
 	client, err := docker.NewClient(d.dockerAPI)
 	if err != nil {
 		return nil, err
@@ -43,11 +47,19 @@ func (d *Discovery) refreshList() error {
 		return err
 	}
 	d.containers = containers
+	for _, container := range containers {
+		id := container.ID
+		full, err := d.client.InspectContainer(id)
+		if err != nil {
+			return err
+		}
+		d.containersFull[strings.TrimPrefix(full.Name, "/")] = full
+	}
 	return nil
 }
 
 func (d *Discovery) handleEvent(event *docker.APIEvents) error {
-	fmt.Printf("%+v\n", event)
+	fmt.Printf("Incoming Event: %v (%+v)\n", event.Status, event)
 	err := d.refreshList()
 	if err != nil {
 		return err
@@ -56,34 +68,30 @@ func (d *Discovery) handleEvent(event *docker.APIEvents) error {
 	return nil
 }
 
-func (d *Discovery) GetContainerByName(name string) (*docker.APIContainers, error) {
-	for _, container := range d.containers {
-		for _, n := range container.Names {
-			if name == n {
-				return &container, nil
-			}
-		}
+func (d *Discovery) GetPortMappings(name string) (map[docker.Port][]docker.PortBinding, error) {
+	container, ok := d.containersFull[name]
+	if !ok {
+		return nil, errors.New("Container not found!")
 	}
-	return nil, errors.New("Container not found!")
+	return container.NetworkSettings.Ports, nil
 }
 
-func (d *Discovery) GetPortMappings(name string) ([]docker.APIPort, error) {
-	cont, err := d.GetContainerByName(name)
-	if err != nil {
-		return nil, err
-	}
-	return cont.Ports, nil
-}
-
-func (d *Discovery) GetPortMapping(name string, port int64) (int64, error) {
+func (d *Discovery) GetPortMapping(name string, port Port) (Port, error) {
 	mappings, err := d.GetPortMappings(name)
 	if err != nil {
-		return 0, err
+		return Port{}, err
 	}
-	for _, mapping := range mappings {
-		if mapping.PrivatePort == port {
-			return mapping.PrivatePort, nil
-		}
+
+	internal := port.ToDockerPort()
+	mapping, ok := mappings[internal]
+	if !ok {
+		return Port{}, errors.New(fmt.Sprintf("No port mapping available for internal port %s", port))
 	}
-	return 0, errors.New("Port mapping not found!")
+
+	firstMapping := mapping[0]
+	parsed, _ := strconv.ParseInt(firstMapping.HostPort, 10, 64)
+	return Port{
+		port:     parsed,
+		protocol: port.protocol,
+	}, nil
 }
