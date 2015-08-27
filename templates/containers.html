@@ -24,21 +24,25 @@
 					<td>{{ $container.TplGetCommand }}</td>
 					<td>{{ $container.Created.Format "2. Jan 2006 - 15:04:05" }}</td>
 					<td>
-						{{ if $container.State.Running }}
-						Running
-						{{ else if $container.State.Paused }}
-						Paused
-						{{ else if $container.State.Restarting }}
-						Restarting
-						{{ else }}
-						Exited ({{ $container.State.ExitCode }}) at {{ $container.State.FinishedAt.Format "2. Jan 2006 - 15:04:05" }}
-						{{ end }}
+					{{ if $container.State.Running }}
+					Running
+					{{ else if $container.State.Paused }}
+					Paused
+					{{ else if $container.State.Restarting }}
+					Restarting
+					{{ else }}
+					Exited ({{ $container.State.ExitCode }}) at {{ $container.State.FinishedAt.Format "2. Jan 2006 - 15:04:05" }}
+					{{ end }}
 					</td>
 					<td>
 						<ul class="list-unstyled">
-							{{ range $port := $container.TplGetPorts }}
-							<li>{{ $port }}</li>
+						{{ range $port := $container.TplGetPorts }}
+							{{ if $port.Mapping }}
+							<li>{{ $port.Exposed }} -> <a href="http://{{ $.Hostname }}:{{ $port.Mapping }}/">{{ $port.Mapping }}</a></li>	
+							{{ else }}
+							<li>{{ $port.Exposed }}</li>
 							{{ end }}
+						{{ end }}
 						</ul>
 					</td>
 				</tr>

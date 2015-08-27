@@ -20,7 +20,6 @@ func main() {
 	// Serve API and web interface
 	d.serveWeb()
 
-	// TODO(mjb): Settings
 	// TODO(mjb): Notifications on Errors
 	// TODO(mjb): Save logs
 	// TODO(mjb): Persistence

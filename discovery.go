@@ -19,14 +19,19 @@ type Discovery struct {
 	containersFull map[string]*ProjectContainer
 	client         *docker.Client
 	apiPort        int64
-	hostname       string
+	settings       Settings
 }
 
 func NewDiscovery(dockerAPI string, apiPort int64) (*Discovery, error) {
 	d := new(Discovery)
 	d.dockerAPI = dockerAPI
 	d.apiPort = apiPort
-	d.hostname = "marb.ec"
+	d.settings = Settings{
+		Hostname:     "192.168.178.27",
+		Notification: false,
+		SaveLogs:     true,
+		SaveLogsDays: 30,
+	}
 	d.listener = make(chan *docker.APIEvents)
 	d.containers = make([]docker.APIContainers, 0)
 	d.containersFull = make(map[string]*ProjectContainer)
@@ -103,7 +108,7 @@ func (d *Discovery) GetPortMappings(name string) ([]Mapping, error) {
 				Port:     hPort,
 				Protocol: k.Proto(),
 			},
-			Hostname: d.hostname,
+			Hostname: d.settings.Hostname,
 		})
 	}
 	return mappings, nil
@@ -134,7 +139,7 @@ func (d *Discovery) serveWeb() {
 	r.GET("/api/container/:name/mapping/:port", d.ViewAPIContainerMapping)
 	r.GET("/api/container/:name/mapping/:port/:protocol", d.ViewAPIContainerMapping)
 	r.GET("/web/settings", d.ViewWebSettings)
-	r.POST("/web/settings", d.ViewWebSettingsPost)
+	r.POST("/web/settings", d.ViewWebSettings)
 	r.GET("/web/containers", d.ViewWebContainers)
 
 	http.ListenAndServe(fmt.Sprintf(":%d", d.apiPort), r)

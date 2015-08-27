@@ -119,14 +119,14 @@ func (d *Discovery) ViewAPIContainerMapping(w http.ResponseWriter, r *http.Reque
 	_, textVersion := getParams["text"]
 
 	if textVersion {
-		fmt.Fprintf(w, "%s:%d", d.hostname, mapping.Port)
+		fmt.Fprintf(w, "%s:%d", d.settings.Hostname, mapping.Port)
 		return
 	}
 
 	mappingJSON, err := json.Marshal(Mapping{
 		Container: iPort,
 		Host:      mapping,
-		Hostname:  d.hostname,
+		Hostname:  d.settings.Hostname,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
