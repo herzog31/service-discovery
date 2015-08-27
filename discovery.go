@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/fsouza/go-dockerclient"
 	"github.com/julienschmidt/httprouter"
+	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 )
 
@@ -16,7 +16,7 @@ type Discovery struct {
 	dockerAPI      string
 	listener       chan *docker.APIEvents
 	containers     []docker.APIContainers
-	containersFull map[string]*docker.Container
+	containersFull map[string]*ProjectContainer
 	client         *docker.Client
 	apiPort        int64
 	hostname       string
@@ -29,7 +29,7 @@ func NewDiscovery(dockerAPI string, apiPort int64) (*Discovery, error) {
 	d.hostname = "marb.ec"
 	d.listener = make(chan *docker.APIEvents)
 	d.containers = make([]docker.APIContainers, 0)
-	d.containersFull = make(map[string]*docker.Container)
+	d.containersFull = make(map[string]*ProjectContainer)
 	client, err := docker.NewClient(d.dockerAPI)
 	if err != nil {
 		return nil, err
@@ -64,17 +64,18 @@ func (d *Discovery) refreshList() error {
 		if err != nil {
 			return err
 		}
-		d.containersFull[strings.TrimPrefix(full.Name, "/")] = full
+		fullP := NewProjectContainerFromContainer(full)
+		d.containersFull[fullP.FullName] = fullP
 	}
 	return nil
 }
 
 func (d *Discovery) handleEvent(event *docker.APIEvents) error {
-	fmt.Printf("Incoming Event: %v (%+v)\n", event.Status, event)
+	log.Printf("Incoming Event: %v (%+v)\n", event.Status, event)
 	err := d.refreshList()
 	if err != nil {
 		return err
-		fmt.Printf("handleEvent Error: %+v", err)
+		log.Printf("handleEvent Error: %+v", err)
 	}
 	return nil
 }

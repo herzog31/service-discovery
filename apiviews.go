@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/fsouza/go-dockerclient"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"strconv"
@@ -22,7 +21,7 @@ func (d *Discovery) ViewAPIContainers(w http.ResponseWriter, r *http.Request, ps
 }
 
 func (d *Discovery) ViewAPIContainersFull(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	contArray := make([]*docker.Container, 0, len(d.containersFull))
+	contArray := make([]*ProjectContainer, 0, len(d.containersFull))
 	for _, c := range d.containersFull {
 		contArray = append(contArray, c)
 	}

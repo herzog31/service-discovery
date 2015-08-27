@@ -5,7 +5,12 @@
 Service Discovery for Docker written in Go
 
 ## Usage
-TODO
+
+### Requirements
+Requirement     | Version
+--------------- | -------------
+Docker          | 1.8.1+
+Docker-Compose  | 1.4.0+
 
 ### Native
 TODO
