@@ -88,6 +88,9 @@ func (d *Discovery) GetPortMappings(name string) ([]Mapping, error) {
 	mappings := make([]Mapping, 0, len(container.NetworkSettings.Ports))
 	for k, v := range container.NetworkSettings.Ports {
 		iPort, _ := strconv.ParseInt(k.Port(), 10, 64)
+		if len(v) == 0 {
+			continue
+		}
 		host := v[0]
 		hPort, _ := strconv.ParseInt(host.HostPort, 10, 64)
 		mappings = append(mappings, Mapping{
