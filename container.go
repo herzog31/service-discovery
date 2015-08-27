@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/fsouza/go-dockerclient"
 	"strconv"
 	"strings"
@@ -35,13 +36,24 @@ func NewProjectContainerFromContainer(cont *docker.Container) *ProjectContainer 
 		}
 	}
 
-	/* container.Container = *cont
-	if strings.Contains(container.Name, "_") {
-		container.Project = strings.SplitN(container.Name, "_", 2)[0]
-		container.Name = strings.SplitN(container.Name, "_", 2)[1]
-	} else {
-		container.Project = "none"
-	} */
-
 	return container
+}
+
+func (p *ProjectContainer) TplGetCommand() string {
+	return strings.Join(p.Config.Cmd, " ")
+}
+
+func (p *ProjectContainer) TplGetPorts() []string {
+
+	ports := make([]string, 0, len(p.NetworkSettings.Ports))
+	for k, v := range p.NetworkSettings.Ports {
+		if len(v) == 0 {
+			ports = append(ports, string(k))
+			continue
+		}
+		host := v[0]
+		ports = append(ports, fmt.Sprintf("%s -> %s:%s", string(k), host.HostIP, host.HostPort))
+	}
+
+	return ports
 }

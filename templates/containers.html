@@ -1,0 +1,51 @@
+{{ define "content" }}
+<div class="row">
+	<div class="table-responsive">
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Image</th>
+					<th>Command</th>
+					<th>Deployed</th>
+					<th>Status</th>
+					<th>Ports</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{ range $project, $containers := .Containers }}
+				<tr class="info">
+					<td colspan="6">{{ $project }}</td>
+				</tr>
+				{{ range $container := $containers }}
+				<tr>
+					<td>{{ $container.Name }}<br /><small>{{ $container.FullName }}</small></td>
+					<td>{{ $container.Config.Image }}</td>
+					<td>{{ $container.TplGetCommand }}</td>
+					<td>{{ $container.Created.Format "2. Jan 2006 - 15:04:05" }}</td>
+					<td>
+						{{ if $container.State.Running }}
+						Running
+						{{ else if $container.State.Paused }}
+						Paused
+						{{ else if $container.State.Restarting }}
+						Restarting
+						{{ else }}
+						Exited ({{ $container.State.ExitCode }}) at {{ $container.State.FinishedAt.Format "2. Jan 2006 - 15:04:05" }}
+						{{ end }}
+					</td>
+					<td>
+						<ul class="list-unstyled">
+							{{ range $port := $container.TplGetPorts }}
+							<li>{{ $port }}</li>
+							{{ end }}
+						</ul>
+					</td>
+				</tr>
+				{{ end }}
+				{{ end }}
+			</tbody>
+		</table>
+	</div>
+</div>
+{{ end }}
