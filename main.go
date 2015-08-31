@@ -29,7 +29,7 @@ func main() {
 	d.serveWeb()
 
 	// TODO(mjb): JSON override omits
-	// TODO(mjb): HipChat Notification on errors
+	// TODO(mjb): HipChat Notification on errors (github.com/tbruyelle/hipchat-go)
 	// TODO(mjb): Save logs
 	// TODO(mjb): Persistence
 	// TODO(mjb): Authentication

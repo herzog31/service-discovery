@@ -41,6 +41,33 @@ func (d *Discovery) ViewWebSettings(w http.ResponseWriter, r *http.Request, ps h
 			}
 		}
 
+		notificationLogRaw := r.PostFormValue("NotificationLog")
+		if len(notificationLogRaw) == 0 {
+			d.settings.NotificationLog = false
+		} else {
+			notificationLog, err := strconv.ParseBool(notificationLogRaw)
+			if err != nil {
+				log.Print(err.Error())
+				errors = append(errors, "Invalid value for \"Add logs to notification\".")
+			} else {
+				d.settings.NotificationLog = notificationLog
+			}
+		}
+
+		hipChatToken := r.PostFormValue("HipChatToken")
+		if len(hipChatToken) == 0 && d.settings.Notification {
+			errors = append(errors, "Empty HipChat API token.")
+		} else {
+			d.settings.HipChatToken = hipChatToken
+		}
+
+		hipChatRoom := r.PostFormValue("HipChatRoom")
+		if len(hipChatRoom) == 0 && d.settings.Notification {
+			errors = append(errors, "Empty HipChat room.")
+		} else {
+			d.settings.HipChatRoom = hipChatRoom
+		}
+
 		saveLogsRaw := r.PostFormValue("SaveLogs")
 		if len(saveLogsRaw) == 0 {
 			d.settings.SaveLogs = false

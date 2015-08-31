@@ -1,55 +1,61 @@
 {{ define "content" }}
 <div class="row">
-	<div class="table-responsive">
-		<table class="table table-hover">
-			<thead>
-				<tr>
-					<th>Name</th>
-					<th>Image</th>
-					<th>Command</th>
-					<th>Deployed</th>
-					<th>Status</th>
-					<th>Ports</th>
-				</tr>
-			</thead>
-			<tbody>
-				{{ range $project, $containers := .Containers }}
-				<tr class="info">
-					<td colspan="6">{{ $project }}</td>
-				</tr>
-				{{ range $container := $containers }}
-				<tr>
-					<td>{{ $container.Name }}<br /><small>{{ $container.FullName }}</small></td>
-					<td>{{ $container.Config.Image }}</td>
-					<td>{{ $container.TplGetCommand }}</td>
-					<td>{{ $container.Created.Format "2. Jan 2006 - 15:04:05" }}</td>
-					<td>
-					{{ if $container.State.Running }}
-					Running
-					{{ else if $container.State.Paused }}
-					Paused
-					{{ else if $container.State.Restarting }}
-					Restarting
-					{{ else }}
-					Exited ({{ $container.State.ExitCode }}) at {{ $container.State.FinishedAt.Format "2. Jan 2006 - 15:04:05" }}
-					{{ end }}
-					</td>
-					<td>
-						<ul class="list-unstyled">
-						{{ range $port := $container.TplGetPorts }}
-							{{ if $port.Mapping }}
-							<li>{{ $port.Exposed }} -> <a href="http://{{ $.Hostname }}:{{ $port.Mapping }}/">{{ $port.Mapping }}</a></li>	
-							{{ else }}
-							<li>{{ $port.Exposed }}</li>
-							{{ end }}
+	<div class="panel panel-default">
+		<div class="panel-heading">List of containers</div>
+		<div class="panel-body" style="padding: 0px;">
+			<div class="table-responsive">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Image</th>
+							<th>Command</th>
+							<th>Deployed</th>
+							<th>Status</th>
+							<th>Ports</th>
+						</tr>
+					</thead>
+					<tbody>
+						{{ range $project, $containers := .Containers }}
+						<tr class="info">
+							<td colspan="6">{{ $project }}</td>
+						</tr>
+						{{ range $container := $containers }}
+						<tr>
+							<td>{{ $container.Name }}<br /><small>{{ $container.FullName }}</small></td>
+							<td>{{ $container.Config.Image }}</td>
+							<td>{{ $container.TplGetCommand }}</td>
+							<td>{{ $container.Created.Format "2. Jan 2006 - 15:04:05" }}</td>
+							<td>
+								{{ if $container.State.Running }}
+								Running
+								{{ else if $container.State.Paused }}
+								Paused
+								{{ else if $container.State.Restarting }}
+								Restarting
+								{{ else }}
+								Exited ({{ $container.State.ExitCode }}) at {{ $container.State.FinishedAt.Format "2. Jan 2006 - 15:04:05" }}
+								{{ end }}
+							</td>
+							<td>
+								<ul class="list-unstyled">
+									{{ range $port := $container.TplGetPorts }}
+									{{ if $port.Mapping }}
+									<li>{{ $port.Exposed }} -> <a href="http://{{ $.Hostname }}:{{ $port.Mapping }}/">{{ $port.Mapping }}</a></li>
+									{{ else }}
+									<li>{{ $port.Exposed }}</li>
+									{{ end }}
+									{{ end }}
+								</ul>
+							</td>
+						</tr>
 						{{ end }}
-						</ul>
-					</td>
-				</tr>
-				{{ end }}
-				{{ end }}
-			</tbody>
-		</table>
+						{{ end }}
+					</tbody>
+				</table>
+			</div>
+		</div>
 	</div>
+	
 </div>
 {{ end }}

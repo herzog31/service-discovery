@@ -1,8 +1,8 @@
 {{ define "content" }}
 <div class="row">
 	{{ if len .Errors }}
-	<div class="col-sm-12 bg-danger img-rounded">
-		<h3>Errors</h3>
+	<div class="alert alert-danger" role="alert">
+		<strong>Errors</strong><br />
 		<ul class="list-unstyled">
 			{{ range $error := .Errors }}
 			<li>{{ $error }}</li>
@@ -13,31 +13,62 @@
 	<br />
 	{{ end }}
 	<form method="post" name="settings" action="/web/settings">
-		<div class="form-group col-sm-5">
-			<label for="Hostname">Hostname</label>
-			<input type="text" name="Hostname" class="form-control" id="Hostname" placeholder="hostname.org" value="{{ .Settings.Hostname }}" />
+		<div class="panel panel-default">
+			<div class="panel-heading">General</div>
+			<div class="panel-body">
+				<div class="form-group col-sm-5">
+					<label for="Hostname">Hostname</label>
+					<input type="text" name="Hostname" class="form-control" id="Hostname" placeholder="hostname.org" value="{{ .Settings.Hostname }}" />
+				</div>
+			</div>
 		</div>
-		<div class="clearfix"></div>
-		<div class="checkbox col-sm-5">
-			<label>
-				<input type="checkbox" name="Notification" value="true" aria-describedby="NotificationHelp" {{ if .Settings.Notification }} checked="checked" {{ end }} /> Notifications
-			</label>
-			<span id="NotificationHelp" class="help-block">Send notifications when containers crash.</span>
+		<div class="panel panel-default">
+			<div class="panel-heading">Notifications</div>
+			<div class="panel-body">
+				<div class="checkbox col-sm-5">
+					<label>
+						<input type="checkbox" name="Notification" value="true" aria-describedby="NotificationHelp" {{ if .Settings.Notification }} checked="checked" {{ end }} /> Activate notifications
+					</label>
+					<span id="NotificationHelp" class="help-block">Send Hipchat notifications when containers crash.</span>
+				</div>
+				<div class="clearfix"></div>
+				<div class="checkbox col-sm-5">
+					<label>
+						<input type="checkbox" name="NotificationLog" value="true" aria-describedby="NotificationLogHelp" {{ if .Settings.NotificationLog }} checked="checked" {{ end }} /> Add logs to notification
+					</label>
+					<span id="NotificationLogHelp" class="help-block">Adds recent log entries to the crash notification.</span>
+				</div>
+				<div class="clearfix"></div>
+				<div class="form-group col-sm-5">
+					<label for="HipChatToken">HipChat API Token</label>
+					<input type="text" name="HipChatToken" class="form-control" id="HipChatToken" placeholder="Token" value="{{ .Settings.HipChatToken }}" />
+				</div>
+				<div class="clearfix"></div>
+				<div class="form-group col-sm-5">
+					<label for="HipChatRoom">HipChat Room Name</label>
+					<input type="text" name="HipChatRoom" class="form-control" id="HipChatRoom" placeholder="My Room" value="{{ .Settings.HipChatRoom }}" />
+				</div>
+			</div>
 		</div>
-		<div class="clearfix"></div>
-		<div class="checkbox col-sm-5">
-			<label>
-				<input type="checkbox" name="SaveLogs" value="true" aria-describedby="SaveLogsHelp" {{ if .Settings.SaveLogs }} checked="checked" {{ end }} /> Save logs
-			</label>
-			<span id="SaveLogsHelp" class="help-block">Save logs of containers.</span>
+		
+		<div class="panel panel-default">
+			<div class="panel-heading">Logging</div>
+			<div class="panel-body">
+				<div class="checkbox col-sm-5">
+					<label>
+						<input type="checkbox" name="SaveLogs" value="true" aria-describedby="SaveLogsHelp" {{ if .Settings.SaveLogs }} checked="checked" {{ end }} /> Save logs
+					</label>
+					<span id="SaveLogsHelp" class="help-block">Save logs of containers.</span>
+				</div>
+				<div class="clearfix"></div>
+				<div class="form-group col-sm-5">
+					<label for="SaveLogsDays">Save logs Duration</label>
+					<input type="text" name="SaveLogsDays" class="form-control" id="SaveLogsDays" aria-describedby="SaveLogsDaysHelp" placeholder="30" value="{{ .Settings.SaveLogsDays }}" />
+					<span id="SaveLogsDaysHelp" class="help-block">Duration in days for which the logs should be saved.</span>
+				</div>
+			</div>
 		</div>
-		<div class="clearfix"></div>
-		<div class="form-group col-sm-5">
-			<label for="SaveLogsDays">Save logs Duration</label>
-			<input type="text" name="SaveLogsDays" class="form-control" id="SaveLogsDays" aria-describedby="SaveLogsDaysHelp" placeholder="30" value="{{ .Settings.SaveLogsDays }}" />
-			<span id="SaveLogsDaysHelp" class="help-block">Duration in days for which the logs should be saved.</span>
-		</div>
-		<div class="clearfix"></div>
+		
 		<div class="form-group col-sm-5">
 			<button type="submit" name="submit" class="btn btn-default">Save</button>
 		</div>
