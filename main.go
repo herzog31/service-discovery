@@ -1,12 +1,20 @@
 package main
 
 import (
+	"flag"
 	"log"
 )
 
 func main() {
 
-	d, err := NewDiscovery("tcp://192.168.178.27:4243", 8080)
+	var dockerAPI string
+	var webPort int64
+
+	flag.StringVar(&dockerAPI, "api", "unix:///var/run/docker.sock", "Address of Docker API. Defaults to unix:///var/run/docker.sock")
+	flag.Int64Var(&webPort, "port", 8080, "Port for the service discovery's API and web interface.")
+	flag.Parse()
+
+	d, err := NewDiscovery(dockerAPI, webPort)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,6 +31,7 @@ func main() {
 	// TODO(mjb): Notifications on Errors
 	// TODO(mjb): Save logs
 	// TODO(mjb): Persistence
+	// TODO(mjb): Authentication
 	// TODO(mjb): API Request to check if every container in environment is running or exited gracefully
 	// TODO(mjb): Docker container: Linux x64
 	// TODO(mjb): Docker container: Linux ARM
