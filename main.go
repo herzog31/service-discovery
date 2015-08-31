@@ -28,11 +28,11 @@ func main() {
 	// Serve API and web interface
 	d.serveWeb()
 
+	// TODO(mjb): JSON override omits
 	// TODO(mjb): Notifications on Errors
 	// TODO(mjb): Save logs
 	// TODO(mjb): Persistence
 	// TODO(mjb): Authentication
-	// TODO(mjb): API Request to check if every container in environment is running or exited gracefully
 	// TODO(mjb): Docker container: Linux x64
 	// TODO(mjb): Docker container: Linux ARM
 }

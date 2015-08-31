@@ -87,8 +87,6 @@ func (d *Discovery) ViewAPIContainerMappings(w http.ResponseWriter, r *http.Requ
 
 func (d *Discovery) ViewAPIContainerMapping(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-	fmt.Printf("Request:\n%+v\n", r)
-
 	name := ps.ByName("name")
 	port := ps.ByName("port")
 	protocol := ps.ByName("protocol")
@@ -136,5 +134,36 @@ func (d *Discovery) ViewAPIContainerMapping(w http.ResponseWriter, r *http.Reque
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(mappingJSON)
 	return
+
+}
+
+func (d *Discovery) ViewAPIProjectUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	project := ps.ByName("project")
+	if len(project) == 0 {
+		http.NotFound(w, r)
+		return
+	}
+
+	allUp := true
+	number := 0
+
+	for _, v := range d.containersFull {
+		if v.Project != project {
+			continue
+		}
+		if v.State.Running || v.State.ExitCode == 0 {
+			number += 1
+			continue
+		}
+		allUp = false
+	}
+
+	if number == 0 {
+		http.NotFound(w, r)
+		return
+	}
+
+	fmt.Fprintf(w, "%t", allUp)
 
 }

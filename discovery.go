@@ -138,6 +138,7 @@ func (d *Discovery) serveWeb() {
 	r.GET("/api/container/:name/mappings", d.ViewAPIContainerMappings)
 	r.GET("/api/container/:name/mapping/:port", d.ViewAPIContainerMapping)
 	r.GET("/api/container/:name/mapping/:port/:protocol", d.ViewAPIContainerMapping)
+	r.GET("/api/projectUp/:project", d.ViewAPIProjectUp)
 	r.GET("/web/settings", d.ViewWebSettings)
 	r.POST("/web/settings", d.ViewWebSettings)
 	r.GET("/web/containers", d.ViewWebContainers)
