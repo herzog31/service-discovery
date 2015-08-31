@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/fsouza/go-dockerclient"
 	"github.com/julienschmidt/httprouter"
+	"github.com/tbruyelle/hipchat-go/hipchat"
 	"log"
 	"net/http"
 	"strconv"
 	"sync"
-	"time"
 )
 
 type Discovery struct {
@@ -21,6 +21,7 @@ type Discovery struct {
 	client         *docker.Client
 	apiPort        int64
 	settings       Settings
+	hipchatClient  *hipchat.Client
 }
 
 func NewDiscovery(dockerAPI string, apiPort int64) (*Discovery, error) {
@@ -80,11 +81,15 @@ func (d *Discovery) handleEvent(event *docker.APIEvents) error {
 	log.Printf("Incoming Event: %v (%+v)\n", event.Status, event)
 	err := d.refreshList()
 	if err != nil {
-		return err
 		log.Printf("handleEvent Error: %+v", err)
+		return err
 	}
 	if event.Status == "die" && d.settings.Notification {
-		d.handleCrashEvent(event)
+		err = d.handleCrashEvent(event)
+		if err != nil {
+			log.Printf("handleEvent Error: %+v", err)
+			return err
+		}
 	}
 	return nil
 }
@@ -94,11 +99,22 @@ func (d *Discovery) handleCrashEvent(event *docker.APIEvents) error {
 	if err != nil {
 		return err
 	}
+
 	if container.State.ExitCode == 0 {
 		return nil
 	}
 
-	log.Printf("Container %s crashed at %s with status code %d", container.FullName, container.State.FinishedAt.Format(time.RFC822), container.State.ExitCode)
+	if d.hipchatClient == nil {
+		err := d.initHipChatClient()
+		if err != nil {
+			return err
+		}
+	}
+
+	err = d.sendCrashNotification(container)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

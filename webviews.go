@@ -58,7 +58,13 @@ func (d *Discovery) ViewWebSettings(w http.ResponseWriter, r *http.Request, ps h
 		if len(hipChatToken) == 0 && d.settings.Notification {
 			errors = append(errors, "Empty HipChat API token.")
 		} else {
-			d.settings.HipChatToken = hipChatToken
+			if d.settings.HipChatToken != hipChatToken {
+				d.settings.HipChatToken = hipChatToken
+				err := d.initHipChatClient()
+				if err != nil {
+					errors = append(errors, "Invalid HipChat API token.")
+				}
+			}
 		}
 
 		hipChatRoom := r.PostFormValue("HipChatRoom")
