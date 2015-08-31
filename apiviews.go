@@ -145,6 +145,32 @@ func (d *Discovery) ViewAPIContainerMapping(w http.ResponseWriter, r *http.Reque
 
 }
 
+func (d *Discovery) ViewAPIContainerLogs(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	name := ps.ByName("name")
+	if len(name) == 0 {
+		http.NotFound(w, r)
+		return
+	}
+	container, ok := d.containersFull[name]
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	logs, err := d.getLogsOfContainer(container, 50000)
+	if err != nil {
+		d.log.Printf("Could not get logs of container %s: %v", container.FullName, err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "%s", logs)
+
+	return
+
+}
+
 func (d *Discovery) ViewAPIProjectUp(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	project := ps.ByName("project")

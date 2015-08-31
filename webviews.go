@@ -4,7 +4,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"html/template"
 	"net/http"
-	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -97,8 +96,8 @@ func (d *Discovery) ViewWebSettings(w http.ResponseWriter, r *http.Request, ps h
 		if err != nil {
 			errors = append(errors, "Invalid value for save log days.")
 		}
-		if d.settings.SaveLogsDays != int(saveLogsDays) {
-			d.settings.SaveLogsDays = int(saveLogsDays)
+		if d.settings.SaveLogsDays != saveLogsDays {
+			d.settings.SaveLogsDays = saveLogsDays
 			d.log.Printf("Settings: SaveLogDays set to %d", d.settings.SaveLogsDays)
 		}
 	}
@@ -175,36 +174,12 @@ func (d *Discovery) ViewWebContainers(w http.ResponseWriter, r *http.Request, ps
 
 func (d *Discovery) ViewWebLogs(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-	lf, err := os.OpenFile(d.logFile, os.O_RDONLY, 0666)
+	logs, err := d.getLogs(50000)
 	if err != nil {
-		d.log.Printf("Could not open log file %s: %v", d.logFile, err.Error())
+		d.log.Printf("Could not get service discovery logs: %v", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer lf.Close()
-
-	maxBuffer := int64(50000)
-	stats, err := lf.Stat()
-	start := int64(0)
-	bufferSize := stats.Size()
-	if stats.Size() > maxBuffer {
-		bufferSize = maxBuffer
-		start = stats.Size() - bufferSize
-	}
-	logBuffer := make([]byte, bufferSize)
-
-	_, err = lf.ReadAt(logBuffer, start)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	logs := string(logBuffer)
-	firstBreak := strings.Index(logs, "\n")
-	if firstBreak+2 < len(logs) {
-		logs = logs[firstBreak+2:]
-	}
-	logs = strings.TrimSpace(logs)
 
 	tplData := struct {
 		RequestURL string
@@ -218,6 +193,57 @@ func (d *Discovery) ViewWebLogs(w http.ResponseWriter, r *http.Request, ps httpr
 
 	layoutPath := path.Join("templates", "layout.html")
 	containersPath := path.Join("templates", "logs.html")
+
+	tpl, err := template.ParseFiles(layoutPath, containersPath)
+	if err != nil {
+		d.log.Printf("Could not parse template: %v", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := tpl.Execute(w, tplData); err != nil {
+		d.log.Printf("Could not execute template: %v", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	return
+
+}
+
+func (d *Discovery) ViewWebContainerLogs(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	name := ps.ByName("name")
+	if len(name) == 0 {
+		http.NotFound(w, r)
+		return
+	}
+	container, ok := d.containersFull[name]
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	logs, err := d.getLogsOfContainer(container, 50000)
+	if err != nil {
+		d.log.Printf("Could not get logs of container %s: %v", container.FullName, err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	tplData := struct {
+		RequestURL    string
+		Hostname      string
+		Logs          string
+		ContainerName string
+	}{
+		r.URL.RequestURI(),
+		d.settings.Hostname,
+		logs,
+		container.FullName,
+	}
+
+	layoutPath := path.Join("templates", "layout.html")
+	containersPath := path.Join("templates", "containerLogs.html")
 
 	tpl, err := template.ParseFiles(layoutPath, containersPath)
 	if err != nil {

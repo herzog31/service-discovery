@@ -12,12 +12,13 @@
 						<th>Deployed</th>
 						<th>Status</th>
 						<th>Ports</th>
+						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody>
 					{{ range $project, $containers := .Containers }}
 					<tr class="info">
-						<td colspan="6">{{ $project }}</td>
+						<td colspan="7">{{ $project }}</td>
 					</tr>
 					{{ range $container := $containers }}
 					<tr>
@@ -45,6 +46,11 @@
 								<li>{{ $port.Exposed }}</li>
 								{{ end }}
 								{{ end }}
+							</ul>
+						</td>
+						<td>
+							<ul class="list-unstyled">
+								<li><a href="/web/container/{{ $container.FullName }}/logs">Show logs</a></li>
 							</ul>
 						</td>
 					</tr>

@@ -9,4 +9,4 @@ before_install:
   - go get github.com/tcnksm/ghr
 after_success:
   - gox -osarch="$OS_ARCH" -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}"
-  - ghr -u $GITHUB_USER -t $GITHUB_TOKEN --replace v0.3.0 dist/
+  - ghr -u $GITHUB_USER -t $GITHUB_TOKEN --replace v0.4.0 dist/

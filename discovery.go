@@ -11,20 +11,22 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type Discovery struct {
 	sync.Mutex
-	dockerAPI      string
-	listener       chan *docker.APIEvents
-	containers     []docker.APIContainers
-	containersFull map[string]*ProjectContainer
-	client         *docker.Client
-	apiPort        int64
-	settings       Settings
-	hipchatClient  *hipchat.Client
-	log            *log.Logger
-	logFile        string
+	dockerAPI        string
+	listener         chan *docker.APIEvents
+	containers       []docker.APIContainers
+	containersFull   map[string]*ProjectContainer
+	client           *docker.Client
+	apiPort          int64
+	settings         Settings
+	hipchatClient    *hipchat.Client
+	log              *log.Logger
+	logFile          string
+	containerLogPath string
 }
 
 func NewDiscovery(dockerAPI string, apiPort int64) (*Discovery, error) {
@@ -32,11 +34,13 @@ func NewDiscovery(dockerAPI string, apiPort int64) (*Discovery, error) {
 	d.dockerAPI = dockerAPI
 	d.apiPort = apiPort
 	d.settings = Settings{
-		Hostname:     "192.168.178.27",
-		Notification: false,
-		SaveLogs:     true,
-		SaveLogsDays: 30,
+		Hostname:         "192.168.178.27",
+		Notification:     false,
+		SaveLogs:         true,
+		SaveLogsDays:     30,
+		SaveLogsInterval: 30,
 	}
+	d.containerLogPath = "logs"
 	d.logFile = "discovery.log"
 	d.listener = make(chan *docker.APIEvents)
 	d.containers = make([]docker.APIContainers, 0)
@@ -130,6 +134,26 @@ func (d *Discovery) handleCrashEvent(event *docker.APIEvents) error {
 	return nil
 }
 
+func (d *Discovery) gatherLogs() {
+	err := os.MkdirAll(d.containerLogPath, 0777)
+	if err != nil {
+		d.log.Printf("Could not create log folder: %s", err.Error())
+		return
+	}
+	lastLogCheckMap := make(map[string]time.Time)
+	for _ = range time.Tick(time.Duration(d.settings.SaveLogsInterval) * time.Second) {
+		for _, container := range d.containersFull {
+			lastLogCheck, ok := lastLogCheckMap[container.ID]
+			if !ok {
+				d.gatherLogForContainer(container, 0)
+			} else {
+				d.gatherLogForContainer(container, lastLogCheck.Unix())
+			}
+			lastLogCheckMap[container.ID] = time.Now()
+		}
+	}
+}
+
 func (d *Discovery) getContainerById(id string) (*ProjectContainer, error) {
 	for _, v := range d.containersFull {
 		if v.ID == id {
@@ -189,6 +213,7 @@ func (d *Discovery) serveWeb() {
 	r.GET("/api/containers", d.ViewAPIContainers)
 	r.GET("/api/containersFull", d.ViewAPIContainersFull)
 	r.GET("/api/container/:name", d.ViewAPIContainerName)
+	r.GET("/api/container/:name/logs", d.ViewAPIContainerLogs)
 	r.GET("/api/container/:name/mappings", d.ViewAPIContainerMappings)
 	r.GET("/api/container/:name/mapping/:port", d.ViewAPIContainerMapping)
 	r.GET("/api/container/:name/mapping/:port/:protocol", d.ViewAPIContainerMapping)
@@ -196,6 +221,7 @@ func (d *Discovery) serveWeb() {
 	r.GET("/web/settings", d.ViewWebSettings)
 	r.POST("/web/settings", d.ViewWebSettings)
 	r.GET("/web/containers", d.ViewWebContainers)
+	r.GET("/web/container/:name/logs", d.ViewWebContainerLogs)
 	r.GET("/web/logs", d.ViewWebLogs)
 
 	http.ListenAndServe(fmt.Sprintf(":%d", d.apiPort), r)

@@ -7,6 +7,7 @@ service-discovery
 # Folders
 _obj
 _test
+logs
 
 # Architecture specific extensions/prefixes
 *.[568vq]

@@ -25,13 +25,15 @@ func main() {
 	// Listen to Docker events
 	go d.listen()
 
+	// Gather logs
+	go d.gatherLogs()
+
 	// Serve API and web interface
 	d.serveWeb()
 
 	// TODO(mjb): JSON override omits
-	// TODO(mjb): Save logs
 	// TODO(mjb): Persistence (redis, settings, logs)
-	// TODO(mjb): Authentication (seperate tab)
+	// TODO(mjb): Authentication (in settings)
 	// TODO(mjb): API Documentation (separate tab, link to github)
 	// TODO(mjb): Docker container: Linux x64
 	// TODO(mjb): Docker container: Linux ARM
