@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type Discovery struct {
@@ -82,7 +83,33 @@ func (d *Discovery) handleEvent(event *docker.APIEvents) error {
 		return err
 		log.Printf("handleEvent Error: %+v", err)
 	}
+	if event.Status == "die" && d.settings.Notification {
+		d.handleCrashEvent(event)
+	}
 	return nil
+}
+
+func (d *Discovery) handleCrashEvent(event *docker.APIEvents) error {
+	container, err := d.getContainerById(event.ID)
+	if err != nil {
+		return err
+	}
+	if container.State.ExitCode == 0 {
+		return nil
+	}
+
+	log.Printf("Container %s crashed at %s with status code %d", container.FullName, container.State.FinishedAt.Format(time.RFC822), container.State.ExitCode)
+
+	return nil
+}
+
+func (d *Discovery) getContainerById(id string) (*ProjectContainer, error) {
+	for _, v := range d.containersFull {
+		if v.ID == id {
+			return v, nil
+		}
+	}
+	return nil, errors.New("Container not found.")
 }
 
 func (d *Discovery) GetPortMappings(name string) ([]Mapping, error) {

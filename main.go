@@ -29,7 +29,7 @@ func main() {
 	d.serveWeb()
 
 	// TODO(mjb): JSON override omits
-	// TODO(mjb): Notifications on Errors
+	// TODO(mjb): HipChat Notification on errors
 	// TODO(mjb): Save logs
 	// TODO(mjb): Persistence
 	// TODO(mjb): Authentication
