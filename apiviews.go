@@ -11,6 +11,7 @@ import (
 func (d *Discovery) ViewAPIContainers(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	containers, err := json.Marshal(d.containers)
 	if err != nil {
+		d.log.Printf("JSON marshal error: %v", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -27,6 +28,7 @@ func (d *Discovery) ViewAPIContainersFull(w http.ResponseWriter, r *http.Request
 	}
 	containers, err := json.Marshal(contArray)
 	if err != nil {
+		d.log.Printf("JSON marshal error: %v", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -50,6 +52,7 @@ func (d *Discovery) ViewAPIContainerName(w http.ResponseWriter, r *http.Request,
 
 	containerJSON, err := json.Marshal(container)
 	if err != nil {
+		d.log.Printf("JSON marshal error: %v", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -69,12 +72,14 @@ func (d *Discovery) ViewAPIContainerMappings(w http.ResponseWriter, r *http.Requ
 
 	mappings, err := d.GetPortMappings(name)
 	if err != nil {
+		d.log.Printf("Could not get port mappings: %v", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	mappingsJSON, err := json.Marshal(mappings)
 	if err != nil {
+		d.log.Printf("JSON marshal error: %v", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -99,6 +104,7 @@ func (d *Discovery) ViewAPIContainerMapping(w http.ResponseWriter, r *http.Reque
 	}
 	portInt, err := strconv.ParseInt(port, 10, 64)
 	if err != nil {
+		d.log.Printf("Could not parse port as int: %v", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -109,6 +115,7 @@ func (d *Discovery) ViewAPIContainerMapping(w http.ResponseWriter, r *http.Reque
 
 	mapping, err := d.GetPortMapping(name, iPort)
 	if err != nil {
+		d.log.Printf("Could not get port mappings: %v", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -127,6 +134,7 @@ func (d *Discovery) ViewAPIContainerMapping(w http.ResponseWriter, r *http.Reque
 		Hostname:  d.settings.Hostname,
 	})
 	if err != nil {
+		d.log.Printf("JSON marshal error: %v", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

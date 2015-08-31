@@ -8,6 +8,7 @@ import (
 	"github.com/tbruyelle/hipchat-go/hipchat"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"sync"
 )
@@ -22,6 +23,8 @@ type Discovery struct {
 	apiPort        int64
 	settings       Settings
 	hipchatClient  *hipchat.Client
+	log            *log.Logger
+	logFile        string
 }
 
 func NewDiscovery(dockerAPI string, apiPort int64) (*Discovery, error) {
@@ -34,9 +37,17 @@ func NewDiscovery(dockerAPI string, apiPort int64) (*Discovery, error) {
 		SaveLogs:     true,
 		SaveLogsDays: 30,
 	}
+	d.logFile = "discovery.log"
 	d.listener = make(chan *docker.APIEvents)
 	d.containers = make([]docker.APIContainers, 0)
 	d.containersFull = make(map[string]*ProjectContainer)
+
+	lf, err := os.OpenFile(d.logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("Could not open log file %s: %v", d.logFile, err.Error()))
+	}
+	d.log = log.New(lf, "", log.Ldate|log.Ltime|log.Lshortfile)
+
 	client, err := docker.NewClient(d.dockerAPI)
 	if err != nil {
 		return nil, err
@@ -78,16 +89,16 @@ func (d *Discovery) refreshList() error {
 }
 
 func (d *Discovery) handleEvent(event *docker.APIEvents) error {
-	log.Printf("Incoming Event: %v (%+v)\n", event.Status, event)
+	d.log.Print(EventToString(event))
 	err := d.refreshList()
 	if err != nil {
-		log.Printf("handleEvent Error: %+v", err)
+		d.log.Printf("handleEvent Error: %+v", err)
 		return err
 	}
 	if event.Status == "die" && d.settings.Notification {
 		err = d.handleCrashEvent(event)
 		if err != nil {
-			log.Printf("handleEvent Error: %+v", err)
+			d.log.Printf("handleEvent Error: %+v", err)
 			return err
 		}
 	}
@@ -185,6 +196,7 @@ func (d *Discovery) serveWeb() {
 	r.GET("/web/settings", d.ViewWebSettings)
 	r.POST("/web/settings", d.ViewWebSettings)
 	r.GET("/web/containers", d.ViewWebContainers)
+	r.GET("/web/logs", d.ViewWebLogs)
 
 	http.ListenAndServe(fmt.Sprintf(":%d", d.apiPort), r)
 }

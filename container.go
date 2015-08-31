@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/fsouza/go-dockerclient"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type ProjectContainer struct {
@@ -45,6 +47,10 @@ func (p *ProjectContainer) TplGetCommand() string {
 type TplPort struct {
 	Exposed string
 	Mapping string
+}
+
+func EventToString(e *docker.APIEvents) string {
+	return fmt.Sprintf("Event: %s of container with ID %s (Image: %s) at %v", e.Status, e.ID, e.From, time.Unix(e.Time, 0).Local())
 }
 
 func (p *ProjectContainer) TplGetPorts() []TplPort {
