@@ -61,6 +61,13 @@
 					<span id="SaveLogsHelp" class="help-block">Save logs of containers.</span>
 				</div>
 				<div class="clearfix"></div>
+				<div class="checkbox col-sm-5">
+					<label>
+						<input type="checkbox" name="DeleteLogsOnRemove" value="true" aria-describedby="DeleteLogsOnRemoveHelp" {{ if .Settings.DeleteLogsOnRemove }} checked="checked" {{ end }} /> Automatically delete logs
+					</label>
+					<span id="DeleteLogsOnRemoveHelp" class="help-block">Automatically deletes logs of removed containers.</span>
+				</div>
+				<div class="clearfix"></div>
 				<div class="form-group col-sm-5">
 					<label for="SaveLogsDays">Save logs Duration</label>
 					<input type="text" name="SaveLogsDays" class="form-control" id="SaveLogsDays" aria-describedby="SaveLogsDaysHelp" placeholder="30" value="{{ .Settings.SaveLogsDays }}" />

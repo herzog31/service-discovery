@@ -92,6 +92,19 @@ func (d *Discovery) ViewWebSettings(w http.ResponseWriter, r *http.Request, ps h
 			d.log.Printf("Settings: SaveLogs set to %t", saveLogs)
 		}
 
+		deleteLogsOnRemoveRaw := r.PostFormValue("DeleteLogsOnRemove")
+		if len(deleteLogsOnRemoveRaw) == 0 {
+			deleteLogsOnRemoveRaw = "false"
+		}
+		deleteLogsOnRemove, err := strconv.ParseBool(deleteLogsOnRemoveRaw)
+		if err != nil {
+			errors = append(errors, "Invalid value for DeleteLogsOnRemove.")
+		}
+		if d.settings.DeleteLogsOnRemove != deleteLogsOnRemove {
+			d.settings.DeleteLogsOnRemove = deleteLogsOnRemove
+			d.log.Printf("Settings: DeleteLogsOnRemove set to %t", deleteLogsOnRemove)
+		}
+
 		saveLogsDays, err := strconv.ParseInt(r.PostFormValue("SaveLogsDays"), 10, 64)
 		if err != nil {
 			errors = append(errors, "Invalid value for save log days.")

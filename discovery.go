@@ -106,6 +106,16 @@ func (d *Discovery) handleEvent(event *docker.APIEvents) error {
 			return err
 		}
 	}
+	if event.Status == "destroy" && d.settings.DeleteLogsOnRemove {
+		container, err := d.getContainerById(event.ID)
+		if err != nil {
+			return err
+		}
+		err = d.deleteLogsOfContainer(container)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

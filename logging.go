@@ -69,3 +69,7 @@ func readLastBytesOfFile(path string, maxSize int64) (string, error) {
 func (d *Discovery) getLogsOfContainer(container *ProjectContainer, maxSize int64) (string, error) {
 	return readLastBytesOfFile(path.Join(d.containerLogPath, fmt.Sprintf("%s.log", container.FullName)), maxSize)
 }
+
+func (d *Discovery) deleteLogsOfContainer(container *ProjectContainer) error {
+	return os.Remove(path.Join(d.containerLogPath, fmt.Sprintf("%s.log", container.FullName)))
+}
