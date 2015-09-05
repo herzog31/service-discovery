@@ -36,12 +36,13 @@ func (d *Discovery) sendCrashNotification(container *ProjectContainer) error {
 		return err
 	}
 
-	var message string
+	message := fmt.Sprintf("Container <b>%s</b> of project <b>%s</b> crashed at %v with exit code <b>%d</b>.", container.FullName, container.Project, container.State.FinishedAt.Local(), container.State.ExitCode)
 	if d.settings.NotificationLog {
-		// TODO(mjb): Add logs
-		message = ""
-	} else {
-		message = fmt.Sprintf("Container <b>%s</b> of project <b>%s</b> crashed at %v with exit code <b>%d</b>.", container.FullName, container.Project, container.State.FinishedAt.Local(), container.State.ExitCode)
+		logs, err := d.getLogsOfContainer(container, 10000)
+		message += "<br />"
+		if err == nil {
+			message += logs
+		}
 	}
 
 	notification := &hipchat.NotificationRequest{
