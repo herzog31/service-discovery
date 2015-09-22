@@ -19,10 +19,7 @@ deploy:
   provider: releases
   api-key: "$GITHUB_TOKEN"
   file:
-    - "darwin_amd64_service-discovery"
-    - "linux_amd64_service-discovery"
-    - "linux_arm_service-discovery"
-    - "windows_amd64_service-discovery.exe"
+    - "dist/"
   skip_cleanup: true
   on:
     tags: true
