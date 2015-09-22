@@ -1,5 +1,8 @@
 [![Build Status](https://travis-ci.org/herzog31/service-discovery.svg?branch=master)](https://travis-ci.org/herzog31/service-discovery)
 [![GoDoc](https://godoc.org/github.com/herzog31/service-discovery?status.svg)](https://godoc.org/github.com/herzog31/service-discovery)
+[![Docker Hub](https://img.shields.io/docker/pulls/herzog31/service-discovery.svg)](https://hub.docker.com/r/herzog31/service-discovery)
+[![Release](https://img.shields.io/github/release/herzog31/service-discovery.svg)](https://github.com/herzog31/service-discovery/releases)
+
 
 # service-discovery
 Service Discovery for Docker written in Go
@@ -43,4 +46,86 @@ docker run -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock --name d
 In the repository you also find a Dockerfile to build a container for Linux (ARM).
 
 ## API Documentation
+**Request**
+```
+GET /api/containers
+```
+**Response**
+```
 TODO
+```
+***
+
+**Request**
+```
+GET /api/containersFull
+```
+**Response**
+```
+TODO
+```
+***
+
+**Request**
+```
+GET /api/containers/:name
+```
+**Response**
+```
+TODO
+```
+***
+
+**Request**
+```
+GET /api/containers/:name/logs
+```
+**Response**
+```
+TODO
+```
+***
+
+**Request**
+```
+GET /api/containers/:name/mappings
+```
+**Response**
+```
+TODO
+```
+***
+
+**Request**
+```
+GET /api/containers/:name/mapping/:port
+```
+**Parameter**
+- text — Converts JSON response to plaintext
+**Response**
+```
+TODO
+```
+***
+
+**Request**
+```
+GET /api/containers/:name/mapping/:port/:protocol
+```
+**Parameter**
+- text — Converts JSON response to plaintext
+**Response**
+```
+TODO
+```
+***
+
+**Request**
+```
+GET /api/projectUp/:project
+```
+**Response**
+```
+TODO
+```
+***
