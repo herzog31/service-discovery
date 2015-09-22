@@ -10,3 +10,8 @@ before_install:
 after_success:
   - gox -osarch="$OS_ARCH" -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}"
   - ghr -u $GITHUB_USER -t $GITHUB_TOKEN --replace v0.4.0 dist/
+  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker build -f Dockerfile_linux_amd64 -t herzog31/service-discovery:latest .
+  - docker push herzog31/service-discovery:latest
+  - docker build -f Dockerfile_linux_arm -t herzog31/service-discovery-arm:latest .
+  - docker push herzog31/service-discovery-arm:latest

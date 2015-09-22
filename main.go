@@ -31,7 +31,6 @@ func main() {
 	// Serve API and web interface
 	d.serveWeb()
 
-	// TODO(mjb): Logs of deleted containers / Possibility to delete logs
 	// TODO(mjb): JSON override omits
 	// TODO(mjb): Persistence (redis, settings, logs)
 	// TODO(mjb): Authentication (in settings)

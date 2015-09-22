@@ -1,0 +1,15 @@
+FROM gliderlabs/alpine:latest
+
+MAINTAINER Mark J. Becker <mjb@marb.ec>
+
+RUN apk --update add openssl ca-certificates
+
+RUN mkdir /discovery-root
+RUN chmod -R 0777 /discovery-root
+WORKDIR /discovery-root
+
+COPY dist/linux_amd64_service-discovery ./service-discovery
+COPY templates/ templates/
+CMD ["./service-discovery"]
+
+EXPORT 8080
