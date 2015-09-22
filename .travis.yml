@@ -6,7 +6,7 @@ services:
   - docker
 env:
   - "PATH=/home/travis/gopath/bin:$PATH"
-  - OS_ARCH="darwin/amd64 linux/amd64 linux/arm windows/amd64"
+    OS_ARCH="darwin/amd64 linux/amd64 linux/arm windows/amd64"
 before_install:
   - go get github.com/mitchellh/gox
 after_success:
