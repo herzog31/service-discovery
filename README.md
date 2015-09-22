@@ -2,7 +2,7 @@
 [![GoDoc](https://godoc.org/github.com/herzog31/service-discovery?status.svg)](https://godoc.org/github.com/herzog31/service-discovery)
 [![Docker Hub](https://img.shields.io/docker/pulls/herzog31/service-discovery.svg)](https://hub.docker.com/r/herzog31/service-discovery)
 [![Release](https://img.shields.io/github/release/herzog31/service-discovery.svg)](https://github.com/herzog31/service-discovery/releases)
-
+[![Go](https://img.shields.io/badge/Go-1.5.1-blue.svg)](https://golang.org/)
 
 # service-discovery
 Service Discovery for Docker written in Go
@@ -15,7 +15,7 @@ In the web interface you can see a list of all containers and their logs, a sett
 ### Settings
 First, please set the hostname of Docker host, so the service discovery can generate valid links to your containers.
 
-You can enable notifications, so that whenever one of your containers crashes, you receive a notification via HipChat.
+You can enable notifications, so that whenever one of your containers crashes, you receive a notification via [HipChat](https://www.hipchat.com/).
 It is possible to include recent logging information of the crashed container in the notification.
 
 In the last section of the settings, you can configure the logging behaviour of the service discovery.
@@ -50,6 +50,7 @@ In the repository you also find a Dockerfile to build a container for Linux (ARM
 ```
 GET /api/containers
 ```
+
 **Response**
 ```
 TODO
@@ -60,6 +61,7 @@ TODO
 ```
 GET /api/containersFull
 ```
+
 **Response**
 ```
 TODO
@@ -70,6 +72,7 @@ TODO
 ```
 GET /api/containers/:name
 ```
+
 **Response**
 ```
 TODO
@@ -80,6 +83,7 @@ TODO
 ```
 GET /api/containers/:name/logs
 ```
+
 **Response**
 ```
 TODO
@@ -90,6 +94,7 @@ TODO
 ```
 GET /api/containers/:name/mappings
 ```
+
 **Response**
 ```
 TODO
@@ -100,8 +105,10 @@ TODO
 ```
 GET /api/containers/:name/mapping/:port
 ```
+
 **Parameter**
 - text — Converts JSON response to plaintext
+
 **Response**
 ```
 TODO
@@ -112,8 +119,10 @@ TODO
 ```
 GET /api/containers/:name/mapping/:port/:protocol
 ```
+
 **Parameter**
 - text — Converts JSON response to plaintext
+
 **Response**
 ```
 TODO
@@ -124,6 +133,7 @@ TODO
 ```
 GET /api/projectUp/:project
 ```
+
 **Response**
 ```
 TODO
