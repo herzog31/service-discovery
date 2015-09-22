@@ -18,11 +18,9 @@ after_success:
 deploy:
   provider: releases
   api-key: "$GITHUB_TOKEN"
+  file_glob: true
   file:
-    - "dist/darwin_amd64_service-discovery"
-    - "dist/linux_amd64_service-discovery"
-    - "dist/linux_arm_service-discovery"
-    - "dist/windows_amd64_service-discovery.exe"
+    - "dist/*"
   skip_cleanup: true
   on:
     tags: true
