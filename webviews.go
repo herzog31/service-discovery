@@ -190,8 +190,7 @@ func (d *Discovery) ViewWebLogs(w http.ResponseWriter, r *http.Request, ps httpr
 	logs, err := d.getLogs(50000)
 	if err != nil {
 		d.log.Printf("Could not get service discovery logs: %v", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		logs = "No logging information available."
 	}
 
 	tplData := struct {
@@ -239,8 +238,7 @@ func (d *Discovery) ViewWebContainerLogs(w http.ResponseWriter, r *http.Request,
 	logs, err := d.getLogsOfContainer(container, 50000)
 	if err != nil {
 		d.log.Printf("Could not get logs of container %s: %v", container.FullName, err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		logs = "No logging information available."
 	}
 
 	tplData := struct {
