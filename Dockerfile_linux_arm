@@ -9,7 +9,8 @@ RUN chmod -R 0777 /discovery-root
 WORKDIR /discovery-root
 
 COPY dist/linux_arm_service-discovery ./service-discovery
+RUN chmod +x ./service-discovery
 COPY templates/ templates/
 CMD ["./service-discovery"]
 
-EXPORT 8080
+EXPOSE 8080
