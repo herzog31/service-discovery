@@ -31,6 +31,7 @@ func main() {
 	// Serve API and web interface
 	d.serveWeb()
 
+	// TODO(mjb): Filter Events
 	// TODO(mjb): JSON override omits
 	// TODO(mjb): Persistence (redis, settings, logs)
 	// TODO(mjb): Authentication (in settings)
