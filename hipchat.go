@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tbruyelle/hipchat-go/hipchat"
+	"strings"
 )
 
 func (d *Discovery) initHipChatClient() error {
@@ -38,9 +39,10 @@ func (d *Discovery) sendCrashNotification(container *ProjectContainer) error {
 
 	message := fmt.Sprintf("Container <b>%s</b> of project <b>%s</b> crashed at %v with exit code <b>%d</b>.", container.FullName, container.Project, container.State.FinishedAt.Local(), container.State.ExitCode)
 	if d.settings.NotificationLog {
-		logs, err := d.getLogsOfContainer(container, 10000)
+		logs, err := d.getLogsOfContainer(container, 5000)
 		message += "<br />"
 		if err == nil {
+			logs = strings.Replace(logs, "\n", "<br />", -1)
 			message += logs
 		}
 	}
