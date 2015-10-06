@@ -95,7 +95,7 @@ func (d *Discovery) refreshList() error {
 
 func (d *Discovery) handleEvent(event *docker.APIEvents) error {
 	d.log.Print(EventToString(event))
-	if event.Status == "create" || event.Status == "destroy" || event.Status == "start" || event.Status == "stop" {
+	if event.Status == "create" || event.Status == "destroy" || event.Status == "start" || event.Status == "stop" || event.Status == "die" {
 		err := d.refreshList()
 		if err != nil {
 			d.log.Printf("handleEvent Error: %+v", err)
