@@ -271,3 +271,32 @@ func (d *Discovery) ViewWebContainerLogs(w http.ResponseWriter, r *http.Request,
 	return
 
 }
+
+func (d *Discovery) ViewWebAbout(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	tplData := struct {
+		RequestURL string
+		Hostname   string
+	}{
+		r.URL.RequestURI(),
+		d.settings.Hostname,
+	}
+
+	layoutPath := path.Join("templates", "layout.html")
+	containersPath := path.Join("templates", "about.html")
+
+	tpl, err := template.ParseFiles(layoutPath, containersPath)
+	if err != nil {
+		d.log.Printf("Could not parse template: %v", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := tpl.Execute(w, tplData); err != nil {
+		d.log.Printf("Could not execute template: %v", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	return
+
+}

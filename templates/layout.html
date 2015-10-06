@@ -42,6 +42,11 @@
 								{{ else }}
 								<li><a href="/web/logs">Logs</a></li>
 								{{ end }}
+								{{ if eq .RequestURL "/web/about" }}
+								<li class="active"><a href="/web/about">About</a></li>
+								{{ else }}
+								<li><a href="/web/about">About</a></li>
+								{{ end }}
 							</ul>
 						</div>
 					</div>

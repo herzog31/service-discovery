@@ -238,6 +238,7 @@ func (d *Discovery) serveWeb() {
 	r.GET("/web/containers", d.ViewWebContainers)
 	r.GET("/web/container/:name/logs", d.ViewWebContainerLogs)
 	r.GET("/web/logs", d.ViewWebLogs)
+	r.GET("/web/about", d.ViewWebAbout)
 
 	http.ListenAndServe(fmt.Sprintf(":%d", d.apiPort), r)
 }
