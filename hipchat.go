@@ -37,13 +37,21 @@ func (d *Discovery) sendCrashNotification(container *ProjectContainer) error {
 		return err
 	}
 
-	message := fmt.Sprintf("Container <b>%s</b> of project <b>%s</b> crashed at %v with exit code <b>%d</b>.", container.FullName, container.Project, container.State.FinishedAt.Local(), container.State.ExitCode)
+	var message string
+	if container.Project != "" {
+		message = fmt.Sprintf("Container <b>%s</b> of project <b>%s</b> crashed at %v with exit code <b>%d</b>.", container.FullName, container.Project, container.State.FinishedAt.Local(), container.State.ExitCode)
+	} else {
+		message = fmt.Sprintf("Container <b>%s</b> crashed at %v with exit code <b>%d</b>.", container.FullName, container.State.FinishedAt.Local(), container.State.ExitCode)
+	}
+
 	if d.settings.NotificationLog {
 		logs, err := d.getLogsOfContainer(container, 5000)
 		message += "<br />"
 		if err == nil {
 			logs = strings.Replace(logs, "\n", "<br />", -1)
 			message += logs
+		} else {
+			d.log.Printf("Could not get logs of container %s: %v", container.FullName, err.Error())
 		}
 	}
 
