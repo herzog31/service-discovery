@@ -5,7 +5,7 @@
 [![Go](https://img.shields.io/badge/Go-1.5.1-blue.svg)](https://golang.org/)
 
 # service-discovery
-Service Discovery for Docker written in Go
+Service Discovery for Docker, written in Go
 
 ## Usage
 Using the API of your Docker Engine the service discovery allows you to access valuable information.

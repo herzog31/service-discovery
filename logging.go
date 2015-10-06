@@ -60,7 +60,9 @@ func readLastBytesOfFile(path string, maxSize int64) (string, error) {
 
 	logs := string(logBuffer)
 	firstBreak := strings.Index(logs, "\n")
-	logs = logs[firstBreak:]
+	if firstBreak != -1 {
+		logs = logs[firstBreak:]
+	}
 	logs = strings.TrimSpace(logs)
 
 	return logs, nil

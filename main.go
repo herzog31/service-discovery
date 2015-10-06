@@ -31,7 +31,6 @@ func main() {
 	// Serve API and web interface
 	d.serveWeb()
 
-	// TODO(mjb): Add template folder to releases
 	// TODO(mjb): JSON override omits
 	// TODO(mjb): Persistence (redis, settings, logs)
 	// TODO(mjb): Authentication (in settings)
