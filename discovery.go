@@ -80,6 +80,7 @@ func (d *Discovery) refreshList() error {
 	d.Lock()
 	defer d.Unlock()
 	d.containers = containers
+	d.containersFull = make(map[string]*ProjectContainer)
 	for _, container := range containers {
 		id := container.ID
 		full, err := d.client.InspectContainer(id)
@@ -232,6 +233,8 @@ func (d *Discovery) serveWeb() {
 	r.GET("/api/projectUp/:project", d.ViewAPIProjectUp)
 	r.GET("/web/settings", d.ViewWebSettings)
 	r.POST("/web/settings", d.ViewWebSettings)
+	r.GET("/", d.ViewWebContainers)
+	r.GET("/web", d.ViewWebContainers)
 	r.GET("/web/containers", d.ViewWebContainers)
 	r.GET("/web/container/:name/logs", d.ViewWebContainerLogs)
 	r.GET("/web/logs", d.ViewWebLogs)

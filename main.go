@@ -35,7 +35,4 @@ func main() {
 	// TODO(mjb): JSON override omits
 	// TODO(mjb): Persistence (redis, settings, logs)
 	// TODO(mjb): Authentication (in settings)
-	// TODO(mjb): API Documentation (separate tab, link to github)
-	// TODO(mjb): CD Docker container: Linux x64
-	// TODO(mjb): CD Docker container: Linux ARM
 }
